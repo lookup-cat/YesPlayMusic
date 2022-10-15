@@ -4,6 +4,7 @@ WORKDIR /app
 RUN sed -i 's/dl-cdn.alpinelinux.org/mirrors.tuna.tsinghua.edu.cn/g' /etc/apk/repositories
 RUN apk add --no-cache python3 make g++ git
 COPY package.json yarn.lock ./
+RUN yarn config set registry https://registry.npm.taobao.org/
 RUN yarn install
 COPY . .
 RUN yarn build
@@ -40,8 +41,8 @@ RUN echo $'server { \n\
 
 COPY --from=build /app/package.json /usr/local/lib/
 
-RUN apk add --no-cache --repository http://dl-cdn.alpinelinux.org/alpine/v3.14/main libuv jq \
-  && apk add --no-cache --update-cache --repository http://dl-cdn.alpinelinux.org/alpine/v3.14/main nodejs npm \
+RUN apk add --no-cache libuv jq \
+  && apk add --no-cache nodejs npm \
   && npm i -g NeteaseCloudMusicApi@"$(jq -r '.dependencies.NeteaseCloudMusicApi' /usr/local/lib/package.json)"
 
 COPY --from=build /app/dist /usr/share/nginx/html
